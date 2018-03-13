@@ -1,0 +1,66 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.redhat.vrp</groupId>
+		<artifactId>vehicle-routing</artifactId>
+		<version>1.0.0</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>specialist-routing</artifactId>
+	<packaging>kjar</packaging>
+
+	<dependencies>
+		<!-- Internal dependencies -->
+		<dependency>
+			<groupId>org.optaplanner</groupId>
+			<artifactId>optaplanner-core</artifactId>
+			<version>${version.optaplanner}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.optaplanner</groupId>
+			<artifactId>optaplanner-persistence-common</artifactId>
+			<version>${version.optaplanner}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.optaplanner</groupId>
+			<artifactId>optaplanner-persistence-xstream</artifactId>
+			<version>${version.optaplanner}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Faster XML -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${version.fasterxml.jackson}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${version.fasterxml.jackson}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${version.fasterxml.jackson}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.kie</groupId>
+				<artifactId>kie-maven-plugin</artifactId>
+				<version>${version.optaplanner}</version>
+				<extensions>true</extensions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

@@ -1,0 +1,86 @@
+package org.redhat.vrp.solver;
+
+import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScoreHolder;
+
+import org.redhat.vrp.domain.Home;
+import org.redhat.vrp.domain.location.Location;
+import org.redhat.vrp.domain.Specialist;
+import org.redhat.vrp.domain.SpecialistRoutingSolution;
+import org.redhat.vrp.domain.Job;
+import org.redhat.vrp.domain.Skill;
+import org.redhat.vrp.domain.Proficiency
+import org.redhat.vrp.domain.Specialist;
+import org.redhat.vrp.domain.LocationTimeUtility;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
+
+global HardSoftLongScoreHolder scoreHolder;
+
+// ############################################################################
+// Hard constraints
+// ############################################################################
+
+rule "Specialists must arrive in the requested time window"
+    when
+        Job(windowStart != 0, $timeOutsideOfWindow : timeOutsideOfWindow > 0 )
+    then
+        scoreHolder.addHardConstraintMatch( kcontext, - $timeOutsideOfWindow );
+end
+
+// ############################################################################
+// Soft constraints
+// ############################################################################
+
+rule "Specialists should arrive as close to the start time as possible"
+    when
+        Job(windowStart != 0, windowStart < arrivalTime, $windowStart : windowStart, $arrivalTime : arrivalTime)
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, ($windowStart - $arrivalTime.longValue()) * 2);
+end
+
+rule "Specialists should not arrive early and wait for long periods of time"
+    when
+        Job(windowStart != 0, arrivalTime < windowStart, $windowStart : windowStart, $arrivalTime : arrivalTime)
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, $arrivalTime.longValue() - $windowStart);
+end
+
+rule "Minimize Distance: Distance from previous job"
+    when
+        $job : Job(previousJobOrSpecialist != null, $distanceFromPreviousJobOrSpecialist : distanceFromPreviousJobOrSpecialist)
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, - $distanceFromPreviousJobOrSpecialist * 3);
+end
+
+rule "Minimize Distance: Distance from last job to home"
+    when
+        $job : Job(previousJobOrSpecialist != null, $specialist : specialist != null, nextJob == null)
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, - $job.getDistanceTo($specialist) * 3);
+end
+
+rule "A specialist's skills should match the job requirements"
+    when
+      	$job : Job( $specialist : specialist != null, $requiredSkills : requiredSkills != null )    
+      	not Proficiency( job == $job, skill memberOf $specialist ) 
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, - 1);
+end
+
+
+rule "Specialists should not work past their scheduled ending time"
+    when
+        Job( $specialist : specialist, $departureTime : departureTime != null, departureTime > $specialist.home.windowEnd )
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, $specialist.getHome().getWindowEnd() - $departureTime);
+end
+
+rule "Specialists should not work more than than eight hour days"
+    when
+        Specialist( nextJob != null, $totalWorkingHours : totalWorkingMilliseconds > 28800000  )
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, (8 - $totalWorkingHours));
+end

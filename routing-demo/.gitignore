@@ -1,0 +1,18 @@
+# Compiled class file
+*.class
+
+*.DS_Store
+*.classpath
+*.project
+.settings
+.settings/*
+*/.settings/
+*/.settings/*
+local
+target
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip

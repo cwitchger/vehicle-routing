@@ -1,0 +1,10 @@
+<kmodule xmlns="http://www.drools.org/xsd/kmodule" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<configuration>
+		<!-- Don't enable propertyReactive unless there is a @PropertyReactive 
+			annotation on the domain classes -->
+		<!-- <property key="drools.propertySpecific" value="ALLOWED"/> -->
+	</configuration>
+	<kbase name="default" packages="org.redhat.vrp.solver" default="true">
+		<ksession name="default" default="true" />
+	</kbase>
+</kmodule>
