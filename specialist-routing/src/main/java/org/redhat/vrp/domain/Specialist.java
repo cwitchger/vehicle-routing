@@ -61,10 +61,10 @@ public class Specialist implements JobOrSpecialist {
 	}
 
 	/**
-	 * The standstill parameter can not be null
+	 * The jobOrSpecialist parameter can not be null
 	 */
-	public long getDistanceTo(JobOrSpecialist standstill) {
-		return home.getDistanceTo(standstill);
+	public long getDistanceTo(JobOrSpecialist jobOrSpecialist) {
+		return home.getDistanceTo(jobOrSpecialist);
 	}
 
 	public long getTotalWorkingHours() {

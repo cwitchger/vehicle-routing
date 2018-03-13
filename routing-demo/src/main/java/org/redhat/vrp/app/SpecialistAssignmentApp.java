@@ -12,7 +12,7 @@ import org.redhat.vrp.domain.SpecialistRoutingSolution;
 
 /**
  * This is an executable java class which uses the default data set and default
- * solver configuration to schedule specialists to tasks
+ * solver configuration to schedule specialists to jobs
  */
 public class SpecialistAssignmentApp {
 
@@ -23,8 +23,6 @@ public class SpecialistAssignmentApp {
 
 	public String inputDataPath = "data";
 	public String outputDataFile = inputDataPath + "/output/response.json";
-
-
 
 	private SpecialistRoutingSolution specialistPlan;
 

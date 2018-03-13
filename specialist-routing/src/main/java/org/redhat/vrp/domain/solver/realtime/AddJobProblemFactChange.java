@@ -33,8 +33,6 @@ public class AddJobProblemFactChange implements ProblemFactChange<SpecialistRout
 
 		solution.setJobList(new ArrayList<Job>(solution.getJobList()));
 		
-		System.out.println("so cool");
-
 		// Add the problem fact itself
 		scoreDirector.beforeProblemFactAdded(job);
 		solution.getJobList().add(job);

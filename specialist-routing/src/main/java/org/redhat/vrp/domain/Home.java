@@ -43,10 +43,10 @@ public class Home {
 	}
 
 	/**
-	 * The standstill parameter must never be null
+	 * The jobOrSpecialist parameter must never be null
 	 */
-	public long getDistanceTo(JobOrSpecialist standstill) {
-		return location.getDistanceTo(standstill.getLocation());
+	public long getDistanceTo(JobOrSpecialist jobOrSpecialist) {
+		return location.getDistanceTo(jobOrSpecialist.getLocation());
 	}
 
 }

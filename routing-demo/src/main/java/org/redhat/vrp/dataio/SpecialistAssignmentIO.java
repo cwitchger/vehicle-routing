@@ -50,14 +50,14 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 	public static String jobsFilename = "jobs.txt";
 
 	/**
-	 * Loads the specialist, job, and skill data using the default filenames.
+	 * Loads the specialist and job data using the default filenames.
 	 */
 	public static SpecialistRoutingSolution loadData(String dataFolderPath) {
 		return loadAllData(dataFolderPath, specialistFilename, jobsFilename);
 	}
 
 	/**
-	 * Loads the specialist, job, and skill data using the file names and folder
+	 * Loads the specialist and job data using the file names and folder
 	 * provided
 	 */
 	public static SpecialistRoutingSolution loadAllData(String dataFolderPath, String specialistFilename,
@@ -66,7 +66,6 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 
 		// Initializes the solution with some default data
 		SpecialistRoutingSolution specialistPlan = new SpecialistRoutingSolution();
-		specialistPlan.setName("Sample Dataset");
 		specialistPlan.setDistanceUnitOfMeasurement(UNIT_OF_MEASUREMENT);
 		specialistPlan.setDistanceType(DistanceType.AIR_DISTANCE);
 
@@ -96,7 +95,7 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 	/**
 	 * Loads the specialist data using the java Scanner. The data should be a
 	 * tab delimited list in the following order. 0 - specialist id. 1 -
-	 * specialist home latitude. 2 - specialist home longitude, 3 - skill list .
+	 * specialist home latitude. 2 - specialist home longitude, 3 - skill list.
 	 */
 	private static List<Specialist> loadSpecialistData(File dataFolder, String specialistFilename) {
 		File specialistFile = new File(dataFolder, specialistFilename);

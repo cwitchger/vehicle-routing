@@ -148,17 +148,17 @@ public class Job implements JobOrSpecialist {
 	}
 
 	/**
-	 * The standstill parameter can not be null
+	 * The jobOrSpecialist parameter can not be null
 	 */
-	public long getDistanceFrom(JobOrSpecialist standstill) {
-		return standstill.getLocation().getDistanceTo(location);
+	public long getDistanceFrom(JobOrSpecialist jobOrSpecialist) {
+		return jobOrSpecialist.getLocation().getDistanceTo(location);
 	}
 
 	/**
-	 * The standstill parameter can not be null
+	 * The jobOrSpecialist parameter can not be null
 	 */
-	public long getDistanceTo(JobOrSpecialist standstill) {
-		return location.getDistanceTo(standstill.getLocation());
+	public long getDistanceTo(JobOrSpecialist jobOrSpecialist) {
+		return location.getDistanceTo(jobOrSpecialist.getLocation());
 	}
 
 	/**

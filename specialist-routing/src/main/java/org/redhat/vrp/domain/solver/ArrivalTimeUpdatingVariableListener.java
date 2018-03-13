@@ -63,7 +63,8 @@ public class ArrivalTimeUpdatingVariableListener implements VariableListener<Job
 			return null;
 		}
 		if (job.getPreviousJobOrSpecialist() instanceof Specialist) {
-			// PreviousJobOrSpecialist is the Specialist, so we leave from the Home at the best suitable time
+			
+			// PreviousJobOrSpecialist is the Specialist, so we leave from home at the best suitable time
 			return Math.max(job.getWindowStart(),
 					previousDepartureTime + job.getDistanceFromPreviousJobOrSpecialist());
 		}
