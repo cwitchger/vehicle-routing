@@ -1,11 +1,11 @@
-## Continuous Planning with Fact Changes
+# Continuous Planning with Fact Changes
 
 This specialist routing project has been made so that it can be deployed to the kie server and executed remotely.
 
-#### Setup
+## Setup
 For setup instructions see [Kie Server Integration](kieserver-integration.md)
 
-##### Add continuous solver
+### Add continuous solver
 URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist-routing/solvers/nonstopVRPSolver`
 
 Method: `Put`
@@ -26,7 +26,7 @@ Body:
 </solver-instance>
 ```
 
-##### Post content to solver
+### Post content to solver
 URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist-routing/solvers/nonstopVRPSolver/state/solving`
 
 Method: `POST`
@@ -155,7 +155,7 @@ Body:
 }
 ```
 
-##### Add job while solving
+### Add job while solving
 URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist-routing/solvers/nonstopVRPSolver/problemfactchanges`
 
 Method: `POST`
@@ -194,7 +194,7 @@ Body:
 }
 ```
 
-##### Check if fact change was processed
+### Check if fact change was processed
 URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist-routing/solvers/nonstopVRPSolver/problemfactchanges/processed`
 
 Method: `GET`
@@ -207,7 +207,7 @@ Headers:
 
 Authorization: `Basic`
 
-##### Get best solution
+### Get best solution
 URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist-routing/solvers/nonstopVRPSolver/bestsolution`
 
 Method: `GET`
@@ -220,7 +220,7 @@ Headers:
 
 Authorization: `Basic`
 
-##### Terminate Solving
+### Terminate Solving
 URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist-routing/solvers/nonstopVRPSolver/state/terminating-early`
 
 Method: `POST`

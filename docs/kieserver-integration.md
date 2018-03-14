@@ -1,19 +1,19 @@
-## Deploying Business Optimizer Rules to Kie Server
+# Deploying Business Optimizer Rules to Kie Server
 
-This kjar has been made so that it can be deployed to the kie server and can be executed remotely.
+This specialist routing project has been made so that it can be deployed to the kie server and executed remotely.
 
-#### Requirements
+## Requirements
 * JBoss EAP 7.1
 * Decision Manager 7
 
-#### Setup
+## Setup
 * Perform a default installation of JBoss EAP and Decision Manager
-* Execute a `mvn clean install` to compile the specialist-routing kjar and install it to your local m2 folder
+* Execute a `mvn clean install` in the specialist-routing project to compile the specialist-routing kjar and install it to your local m2 folder
 
-#### Executing Requests
+## Executing Requests
 In the following section we will use a series of ReST requests to create a container and execute the solver. You can use curl, Postman, SoapUI, or another tool to execute these requests.
 
-##### Create container
+### Create container
 URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist-routing`
 
 Method: `Put`
@@ -37,7 +37,7 @@ Body:
 }
 ```
 
-##### Add solver to container
+### Add solver to container
 URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist-routing/solvers/vrpSolver`
 
 Method: `Put`
@@ -58,7 +58,7 @@ Body:
 </solver-instance>
 ```
 
-##### Post content to solver
+### Post content to solver
 URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist-routing/solvers/vrpSolver/state/solving`
 
 Method: `POST`
@@ -187,7 +187,7 @@ Body:
 }
 ```
 
-##### Get best solution
+### Get best solution
 URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist-routing/solvers/vrpSolver/bestsolution`
 
 Method: `GET`
@@ -200,7 +200,7 @@ Headers:
 
 Authorization: `Basic`
 
-##### Add job while solving
+### Add job while solving
 URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist-routing/solvers/vrpSolver/bestsolution`
 
 Method: `GET`

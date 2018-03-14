@@ -14,8 +14,8 @@ The project is split in to two projects
 2. [routing-demo](routing-demo/README.md) which can be used for running the demo locally
 
 
-#### Kie Server Integration
-For instructions on deploying the specialist routing solution to the kie server for remote execution, see [Kie Server Integration](../docs/kieserver-integration.md)
+## Kie Server Integration
+For instructions on deploying the specialist routing solution to the kie server for remote execution, see [Kie Server Integration](docs/kieserver-integration.md)
 
-#### Continuous Planning
-For an example on continuous planning with fact changes for the specialist routing solution, see [Continuous Planning](../docs/continuous-planning.md)
+## Continuous Planning
+For an example on continuous planning with fact changes for the specialist routing solution, see [Continuous Planning](docs/continuous-planning.md)
