@@ -1,6 +1,8 @@
 package org.redhat.vrp.domain;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningScore;
@@ -12,14 +14,14 @@ import org.optaplanner.persistence.xstream.api.score.buildin.hardsoftlong.HardSo
 import org.redhat.vrp.domain.location.DistanceType;
 import org.redhat.vrp.domain.location.Location;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 
 @PlanningSolution
 @XStreamAlias("RoutingSolution")
 public class SpecialistRoutingSolution {
-
-	protected String name;
 
 	protected DistanceType distanceType;
 
@@ -46,14 +48,6 @@ public class SpecialistRoutingSolution {
 	@XStreamConverter(HardSoftLongScoreXStreamConverter.class)
 	protected HardSoftLongScore score;
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public DistanceType getDistanceType() {
 		return distanceType;
 	}
@@ -70,6 +64,7 @@ public class SpecialistRoutingSolution {
 		this.distanceUnitOfMeasurement = distanceUnitOfMeasurement;
 	}
 
+	@JsonProperty(access = Access.WRITE_ONLY)
 	public List<Location> getLocationList() {
 		return locationList;
 	}
@@ -78,6 +73,7 @@ public class SpecialistRoutingSolution {
 		this.locationList = locationList;
 	}
 
+	@JsonProperty(access = Access.WRITE_ONLY)
 	public List<Home> getHomeList() {
 		return homeList;
 	}
@@ -92,6 +88,8 @@ public class SpecialistRoutingSolution {
 
 	public void setSpecialistList(List<Specialist> specialistList) {
 		this.specialistList = specialistList;
+
+		updateHomeList();
 	}
 
 	public List<Job> getJobList() {
@@ -100,6 +98,8 @@ public class SpecialistRoutingSolution {
 
 	public void setJobList(List<Job> jobList) {
 		this.jobList = jobList;
+
+		addProblemFactsForJobs();
 	}
 
 	public HardSoftLongScore getScore() {
@@ -110,16 +110,51 @@ public class SpecialistRoutingSolution {
 		this.score = score;
 	}
 
-	public List<Job> getAllJobs() {
-		return jobList;
-	}
-
+	@JsonProperty(access = Access.WRITE_ONLY)
 	public List<Proficiency> getProficiencies() {
 		return proficiencies;
 	}
 
 	public void setProficiencies(List<Proficiency> proficiencies) {
 		this.proficiencies = proficiencies;
+	}
+
+	/**
+	 * Gathers the specialists home locations from the specialist list and adds
+	 * to the solution
+	 */
+	private void updateHomeList() {
+		this.homeList = this.specialistList.stream().map(Specialist::getHome).collect(Collectors.toList());
+	}
+
+	/**
+	 * Gathers the job locations from the job list and adds to the solution
+	 */
+	private void addToLocationList(Location location) {
+		if (this.locationList == null) {
+			this.locationList = new ArrayList<Location>();
+		}
+
+		this.locationList.add(location);
+	}
+
+	/**
+	 * Creates proficiencies from the job list and adds them to the solution
+	 */
+	private void addProblemFactsForJobs() {
+		this.proficiencies = new ArrayList<Proficiency>();
+
+		for (Job job : this.jobList) {
+			addProficienciesAndLocation(job);
+		}
+	}
+
+	public void addProficienciesAndLocation(Job job) {
+		for (Skill skill : job.getRequiredSkills()) {
+			this.proficiencies.add(new Proficiency(job, skill));
+		}
+
+		addToLocationList(job.getLocation());
 	}
 
 }

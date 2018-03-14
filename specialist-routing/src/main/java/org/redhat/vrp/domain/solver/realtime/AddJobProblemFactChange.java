@@ -32,10 +32,10 @@ public class AddJobProblemFactChange implements ProblemFactChange<SpecialistRout
 		SpecialistRoutingSolution solution = scoreDirector.getWorkingSolution();
 
 		solution.setJobList(new ArrayList<Job>(solution.getJobList()));
-		
+
 		// Add the problem fact itself
 		scoreDirector.beforeProblemFactAdded(job);
-		solution.getJobList().add(job);
+		solution.addProficienciesAndLocation(job);
 		scoreDirector.afterProblemFactAdded(job);
 	}
 

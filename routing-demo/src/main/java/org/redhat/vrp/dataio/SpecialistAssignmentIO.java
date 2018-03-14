@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.stream.Collectors;
 
 import org.optaplanner.persistence.common.api.domain.solution.SolutionFileIO;
 
@@ -23,12 +22,10 @@ import org.redhat.vrp.domain.Job;
 import org.redhat.vrp.domain.Home;
 import org.redhat.vrp.domain.Specialist;
 import org.redhat.vrp.domain.LocationTimeUtility;
-import org.redhat.vrp.domain.Proficiency;
 import org.redhat.vrp.domain.Skill;
 import org.redhat.vrp.domain.SpecialistRoutingSolution;
 import org.redhat.vrp.domain.location.AirLocation;
 import org.redhat.vrp.domain.location.DistanceType;
-import org.redhat.vrp.domain.location.Location;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,24 +67,12 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 		specialistPlan.setDistanceType(DistanceType.AIR_DISTANCE);
 
 		// Load all of the jobs that need to be worked
-		List<Proficiency> proficiencies = new ArrayList<Proficiency>();
-		List<Job> jobs = loadJobData(dataFolder, jobsFilename, proficiencies);
+		List<Job> jobs = loadJobData(dataFolder, jobsFilename);
 		specialistPlan.setJobList(jobs);
-		specialistPlan.setProficiencies(proficiencies);
 
 		// Load all of the specialist that are worked
 		List<Specialist> specialistList = loadSpecialistData(dataFolder, specialistFilename);
 		specialistPlan.setSpecialistList(specialistList);
-
-		// Gathers the specialists home locations from the specialist list and
-		// adds to the solution for faster solving.
-		List<Home> homeList = specialistList.stream().map(Specialist::getHome).collect(Collectors.toList());
-		specialistPlan.setHomeList(homeList);
-
-		// Gathers the job locations from the job list and adds to the
-		// solution for faster solving.
-		List<Location> locationList = jobs.stream().map(Job::getLocation).collect(Collectors.toList());
-		specialistPlan.setLocationList(locationList);
 
 		return specialistPlan;
 	}
@@ -166,7 +151,7 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 	 * delimited list in the following order. 0 - job id. 1 - skill type. 2 -
 	 * job latitude. 3 - job longitude.
 	 */
-	private static List<Job> loadJobData(File dataFolder, String jobFilename, List<Proficiency> proficiencies) {
+	private static List<Job> loadJobData(File dataFolder, String jobFilename) {
 		File specialistFile = new File(dataFolder, jobFilename);
 		List<Job> jobs = new ArrayList<Job>();
 
@@ -187,10 +172,6 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 				Job job = new Job();
 				job.setJobId(tokens[0]);
 				job.setRequiredSkills(skills);
-
-				for (Skill s : skills) {
-					proficiencies.add(new Proficiency(job, s));
-				}
 
 				job.setLocation(new AirLocation(tokens[0], latitude, longitude));
 				job.setServiceDuration(serviceDuration);
