@@ -19,7 +19,8 @@ URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist
 Method: `Put`
 
 Headers:
-| key | value |
+
+| Key | Value |
 |---|---|
 | Content-Type | application/json |
 
@@ -42,7 +43,8 @@ URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist
 Method: `Put`
 
 Headers:
-| key | value |
+
+| Key | Value |
 |---|---|
 | Content-Type | application/xml |
 | X-KIE-ContentType | xstream |
@@ -62,7 +64,8 @@ URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist
 Method: `POST`
 
 Headers:
-| key | value |
+
+| Key | Value |
 |---|---|
 | Content-Type | application/json |
 | X-KIE-ContentType | JSON |
@@ -190,7 +193,8 @@ URL:`http://localhost:8080/kie-server/services/rest/server/containers/specialist
 Method: `GET`
 
 Headers:
-| key | value |
+
+| Key | Value |
 |---|---|
 | Content-Type | application/json |
 
