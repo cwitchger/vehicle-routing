@@ -4,6 +4,10 @@ public class Skill {
 
 	private String name;
 
+	public Skill() {
+		super();
+	}
+
 	public Skill(String name) {
 		super();
 		this.name = name;

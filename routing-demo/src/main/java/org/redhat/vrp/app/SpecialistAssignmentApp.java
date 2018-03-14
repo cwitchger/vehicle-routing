@@ -1,7 +1,5 @@
 package org.redhat.vrp.app;
 
-import java.io.File;
-
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
 import org.optaplanner.core.api.solver.Solver;
@@ -47,7 +45,7 @@ public class SpecialistAssignmentApp {
 		Solver<SpecialistRoutingSolution> solver = factory.buildSolver();
 		SpecialistRoutingSolution solution = solver.solve(specialistPlan);
 
-		SpecialistAssignmentIO.printAll(solution, new File(outputDataFile));
+		SpecialistAssignmentIO.printAll(solution, null);
 	}
 
 }
