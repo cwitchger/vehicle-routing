@@ -99,8 +99,7 @@ public class SpecialistRoutingSolution {
 	public void setJobList(List<Job> jobList) {
 		this.jobList = jobList;
 
-		updateProficiencies();
-		updateLocationList();
+		addProblemFactsForJobs();
 	}
 
 	public HardSoftLongScore getScore() {
@@ -125,29 +124,37 @@ public class SpecialistRoutingSolution {
 	 * to the solution
 	 */
 	private void updateHomeList() {
-		homeList = specialistList.stream().map(Specialist::getHome).collect(Collectors.toList());
+		this.homeList = this.specialistList.stream().map(Specialist::getHome).collect(Collectors.toList());
 	}
 
 	/**
 	 * Gathers the job locations from the job list and adds to the solution
 	 */
-	private void updateLocationList() {
-		locationList = jobList.stream().map(Job::getLocation).collect(Collectors.toList());
+	private void addToLocationList(Location location) {
+		if (this.locationList == null) {
+			this.locationList = new ArrayList<Location>();
+		}
+
+		this.locationList.add(location);
 	}
 
 	/**
 	 * Creates proficiencies from the job list and adds them to the solution
 	 */
-	private void updateProficiencies() {
-		if (this.proficiencies == null || this.proficiencies.size() < 1) {
-			this.proficiencies = new ArrayList<Proficiency>();
+	private void addProblemFactsForJobs() {
+		this.proficiencies = new ArrayList<Proficiency>();
 
-			for (Job job : this.jobList) {
-				for (Skill skill : job.getRequiredSkills()) {
-					proficiencies.add(new Proficiency(job, skill));
-				}
-			}
+		for (Job job : this.jobList) {
+			addProficienciesAndLocation(job);
 		}
+	}
+
+	public void addProficienciesAndLocation(Job job) {
+		for (Skill skill : job.getRequiredSkills()) {
+			this.proficiencies.add(new Proficiency(job, skill));
+		}
+
+		addToLocationList(job.getLocation());
 	}
 
 }
