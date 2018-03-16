@@ -38,7 +38,7 @@ rule "Specialists should arrive as close to the start time as possible"
     when
         Job(windowStart != 0, windowStart < arrivalTime, $windowStart : windowStart, $arrivalTime : arrivalTime)
     then
-        scoreHolder.addSoftConstraintMatch(kcontext, ($windowStart - $arrivalTime.longValue()) * 2);
+        scoreHolder.addSoftConstraintMatch(kcontext, $windowStart - $arrivalTime.longValue());
 end
 
 rule "Specialists should not arrive early and wait for long periods of time"
@@ -52,14 +52,14 @@ rule "Minimize Distance: Distance from previous job"
     when
         $job : Job(previousJobOrSpecialist != null, $distanceFromPreviousJobOrSpecialist : distanceFromPreviousJobOrSpecialist)
     then
-        scoreHolder.addSoftConstraintMatch(kcontext, - $distanceFromPreviousJobOrSpecialist * 3);
+        scoreHolder.addSoftConstraintMatch(kcontext, - $distanceFromPreviousJobOrSpecialist);
 end
 
 rule "Minimize Distance: Distance from last job to home"
     when
         $job : Job(previousJobOrSpecialist != null, $specialist : specialist != null, nextJob == null)
     then
-        scoreHolder.addSoftConstraintMatch(kcontext, - $job.getDistanceTo($specialist) * 3);
+        scoreHolder.addSoftConstraintMatch(kcontext, - $job.getDistanceTo($specialist));
 end
 
 rule "A specialist's skills should match the job requirements"
@@ -69,7 +69,6 @@ rule "A specialist's skills should match the job requirements"
     then
         scoreHolder.addSoftConstraintMatch(kcontext, - 1);
 end
-
 
 rule "Specialists should not work past their scheduled ending time"
     when

@@ -1,7 +1,9 @@
 package org.redhat.vrp.domain;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
@@ -13,6 +15,7 @@ import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import org.optaplanner.persistence.xstream.api.score.buildin.hardsoftlong.HardSoftLongScoreXStreamConverter;
 import org.redhat.vrp.domain.location.DistanceType;
 import org.redhat.vrp.domain.location.Location;
+import org.redhat.vrp.domain.location.RoadLocation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
@@ -26,6 +29,9 @@ public class SpecialistRoutingSolution {
 	protected DistanceType distanceType;
 
 	protected String distanceUnitOfMeasurement;
+
+	@JsonProperty(access = Access.WRITE_ONLY)
+	protected Map<String, Map<String, Long>> distanceMatrix;
 
 	@ProblemFactCollectionProperty
 	protected List<Location> locationList;
@@ -90,6 +96,7 @@ public class SpecialistRoutingSolution {
 		this.specialistList = specialistList;
 
 		updateHomeList();
+		addDistancesToLocations();
 	}
 
 	public List<Job> getJobList() {
@@ -100,6 +107,7 @@ public class SpecialistRoutingSolution {
 		this.jobList = jobList;
 
 		addProblemFactsForJobs();
+		addDistancesToLocations();
 	}
 
 	public HardSoftLongScore getScore() {
@@ -117,6 +125,11 @@ public class SpecialistRoutingSolution {
 
 	public void setProficiencies(List<Proficiency> proficiencies) {
 		this.proficiencies = proficiencies;
+	}
+
+	public void setDistanceMatrix(Map<String, Map<String, Long>> distanceMatrix) {
+		this.distanceMatrix = distanceMatrix;
+		addDistancesToLocations();
 	}
 
 	/**
@@ -157,4 +170,30 @@ public class SpecialistRoutingSolution {
 		addToLocationList(job.getLocation());
 	}
 
+	private void addDistancesToLocations() {
+		if (locationList != null && homeList != null && distanceMatrix != null) {
+			
+			List<Location> locations = getAllLocations();
+			for (Location from : locations) {
+				Map<String, Long> distanceRow = distanceMatrix.get(from.getName());
+				Map<RoadLocation, Long> distanceMap = new HashMap<RoadLocation, Long>();
+				RoadLocation fromRoad = (RoadLocation) from;
+
+				for (Location to : locations) {
+					RoadLocation toRoad = (RoadLocation) to;
+
+					long time = distanceRow.get(to.getName());
+					distanceMap.put(toRoad, time);
+				}
+
+				fromRoad.setTravelDistanceMap(distanceMap);
+			}
+		}
+	}
+
+	private List<Location> getAllLocations() {
+		List<Location> locations = this.homeList.stream().map(Home::getLocation).collect(Collectors.toList());
+		locations.addAll(this.locationList);
+		return locations;
+	}
 }

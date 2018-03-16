@@ -8,7 +8,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes({ @JsonSubTypes.Type(value = AirLocation.class, name = "AirLocation") })
+@JsonSubTypes({ @JsonSubTypes.Type(value = AirLocation.class, name = "AirLocation"),
+		@JsonSubTypes.Type(value = RoadLocation.class, name = "RoadLocation") })
 public abstract class Location {
 
 	protected String name = null;

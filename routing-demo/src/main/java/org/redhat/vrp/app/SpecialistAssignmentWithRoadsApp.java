@@ -9,19 +9,19 @@ import org.redhat.vrp.domain.SpecialistRoutingSolution;
  * This is an executable java class which uses the default data set and default
  * solver configuration to schedule specialists to jobs
  */
-public class SpecialistAssignmentApp {
+public class SpecialistAssignmentWithRoadsApp {
 
 	public String outputDataFile = SpecialistAssignmentIO.DATA_FOLDER_PATH + "/output/response.json";
 
 	private SpecialistRoutingSolution specialistPlan;
 
 	public static void main(String[] args) {
-		SpecialistAssignmentApp vrpApp = new SpecialistAssignmentApp();
+		SpecialistAssignmentWithRoadsApp vrpApp = new SpecialistAssignmentWithRoadsApp();
 		vrpApp.solve();
 	}
 
-	public SpecialistAssignmentApp() {
-		specialistPlan = SpecialistAssignmentIO.loadData(SpecialistAssignmentIO.DATA_FOLDER_PATH);
+	public SpecialistAssignmentWithRoadsApp() {
+		specialistPlan = SpecialistAssignmentIO.loadDataWithRoads(SpecialistAssignmentIO.DATA_FOLDER_PATH + "/small");
 	}
 
 	/**

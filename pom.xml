@@ -43,11 +43,6 @@
 		</dependency>
 	</dependencies>
 
-	<modules>
-		<module>specialist-routing</module>
-		<module>routing-demo</module>
-	</modules>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -61,4 +56,10 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<modules>
+		<module>specialist-routing</module>
+		<module>routing-demo</module>
+		<module>generate-data</module>
+	</modules>
 </project>
