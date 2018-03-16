@@ -1,6 +1,7 @@
 package org.redhat.vrp.dataio;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -26,7 +27,9 @@ import org.redhat.vrp.domain.Skill;
 import org.redhat.vrp.domain.SpecialistRoutingSolution;
 import org.redhat.vrp.domain.location.AirLocation;
 import org.redhat.vrp.domain.location.DistanceType;
+import org.redhat.vrp.domain.location.RoadLocation;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -42,15 +45,37 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 
 	public static String DATA_DELIMITER = "\t";
 
+	public static String DATA_FOLDER_PATH = "data";
+
 	public static String specialistFilename = "specialists.txt";
 
 	public static String jobsFilename = "jobs.txt";
+
+	public static String distanceMatrix = "distance-matrix.json";
 
 	/**
 	 * Loads the specialist and job data using the default filenames.
 	 */
 	public static SpecialistRoutingSolution loadData(String dataFolderPath) {
-		return loadAllData(dataFolderPath, specialistFilename, jobsFilename);
+		return loadAllData(dataFolderPath, specialistFilename, jobsFilename, DistanceType.AIR_DISTANCE);
+	}
+
+	public static SpecialistRoutingSolution loadDataWithRoads(String dataFolderPath) {
+		SpecialistRoutingSolution specialistPlan = loadAllData(dataFolderPath, specialistFilename, jobsFilename,
+				DistanceType.ROAD_DISTANCE);
+
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			FileInputStream inputStream = new FileInputStream(dataFolderPath + "/" + distanceMatrix);
+			Map<String, Map<String, Long>> matrix = mapper.readValue(inputStream,
+					new TypeReference<HashMap<String, HashMap<String, Long>>>() {
+					});
+			specialistPlan.setDistanceMatrix(matrix);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return specialistPlan;
 	}
 
 	/**
@@ -58,20 +83,20 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 	 * provided
 	 */
 	public static SpecialistRoutingSolution loadAllData(String dataFolderPath, String specialistFilename,
-			String jobsFilename) {
+			String jobsFilename, DistanceType distanceType) {
 		File dataFolder = new File(dataFolderPath);
 
 		// Initializes the solution with some default data
 		SpecialistRoutingSolution specialistPlan = new SpecialistRoutingSolution();
 		specialistPlan.setDistanceUnitOfMeasurement(UNIT_OF_MEASUREMENT);
-		specialistPlan.setDistanceType(DistanceType.AIR_DISTANCE);
+		specialistPlan.setDistanceType(distanceType);
 
 		// Load all of the jobs that need to be worked
-		List<Job> jobs = loadJobData(dataFolder, jobsFilename);
+		List<Job> jobs = loadJobData(dataFolder, jobsFilename, distanceType);
 		specialistPlan.setJobList(jobs);
 
 		// Load all of the specialist that are worked
-		List<Specialist> specialistList = loadSpecialistData(dataFolder, specialistFilename);
+		List<Specialist> specialistList = loadSpecialistData(dataFolder, specialistFilename, distanceType);
 		specialistPlan.setSpecialistList(specialistList);
 
 		return specialistPlan;
@@ -82,7 +107,8 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 	 * tab delimited list in the following order. 0 - specialist id. 1 -
 	 * specialist home latitude. 2 - specialist home longitude, 3 - skill list.
 	 */
-	private static List<Specialist> loadSpecialistData(File dataFolder, String specialistFilename) {
+	private static List<Specialist> loadSpecialistData(File dataFolder, String specialistFilename,
+			DistanceType distanceType) {
 		File specialistFile = new File(dataFolder, specialistFilename);
 		List<Specialist> specialists = new ArrayList<Specialist>();
 
@@ -101,7 +127,11 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 
 				Specialist specialist = new Specialist();
 				Home home = new Home();
-				home.setLocation(new AirLocation(name, latitude, longitude));
+				if (distanceType == DistanceType.ROAD_DISTANCE) {
+					home.setLocation(new RoadLocation(name, latitude, longitude));
+				} else {
+					home.setLocation(new AirLocation(name, latitude, longitude));
+				}
 
 				Long windowStart = DATE_FORMAT.parse(WORKING_DAY + " " + DAY_START).getTime();
 				Long windowEnd = DATE_FORMAT.parse(WORKING_DAY + " " + DAY_END).getTime();
@@ -151,7 +181,7 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 	 * delimited list in the following order. 0 - job id. 1 - skill type. 2 -
 	 * job latitude. 3 - job longitude.
 	 */
-	private static List<Job> loadJobData(File dataFolder, String jobFilename) {
+	private static List<Job> loadJobData(File dataFolder, String jobFilename, DistanceType distanceType) {
 		File specialistFile = new File(dataFolder, jobFilename);
 		List<Job> jobs = new ArrayList<Job>();
 
@@ -173,7 +203,11 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 				job.setJobId(tokens[0]);
 				job.setRequiredSkills(skills);
 
-				job.setLocation(new AirLocation(tokens[0], latitude, longitude));
+				if (distanceType == DistanceType.ROAD_DISTANCE) {
+					job.setLocation(new RoadLocation(tokens[0], latitude, longitude));
+				} else {
+					job.setLocation(new AirLocation(tokens[0], latitude, longitude));
+				}
 				job.setServiceDuration(serviceDuration);
 
 				Long windowStart = DATE_FORMAT.parse(WORKING_DAY + " " + DAY_START).getTime();
@@ -209,7 +243,8 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 	@Override
 	public SpecialistRoutingSolution read(File file) {
 		SpecialistRoutingSolution specialistPlan = SpecialistAssignmentIO.loadAllData(file.getPath(),
-				SpecialistAssignmentIO.specialistFilename, SpecialistAssignmentIO.jobsFilename);
+				SpecialistAssignmentIO.specialistFilename, SpecialistAssignmentIO.jobsFilename,
+				DistanceType.AIR_DISTANCE);
 		return specialistPlan;
 	}
 

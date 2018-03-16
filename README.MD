@@ -19,3 +19,6 @@ For instructions on deploying the specialist routing solution to the kie server 
 
 ## Continuous Planning
 For an example on continuous planning with fact changes for the specialist routing solution, see [Continuous Planning](docs/continuous-planning.md)
+
+## Real Road Distance
+For an example on using real road distances, see [Real Road Distances](docs/road-distance.md)
