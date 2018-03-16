@@ -15,16 +15,16 @@ public class LocationTimeUtility {
 
 	public static long SECONDS_TO_MILLISECONDS = 1000;
 
+	public static long millisecondsToHours(long value) {
+		return Math.round(value / HOURS_TO_MILLISECONDS);
+	}
+
 	public static long millisecondsToSeconds(long value) {
 		return Math.round(value / MINUTES_TO_MILLISECONDS);
 	}
 
 	public static long secondsToMillisecond(long value) {
 		return value * SECONDS_TO_MILLISECONDS;
-	}
-
-	public static long millisecondsToHours(long value) {
-		return Math.round(value / HOURS_TO_MILLISECONDS);
 	}
 
 }

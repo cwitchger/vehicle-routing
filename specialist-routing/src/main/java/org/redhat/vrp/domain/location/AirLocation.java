@@ -1,7 +1,8 @@
 package org.redhat.vrp.domain.location;
 
 /**
- * The distance between two locations is a straight line: the Euclidean distance between their GPS coordinates
+ * The distance between two locations is a straight line: the Euclidean distance
+ * between their GPS coordinates
  */
 public class AirLocation extends Location {
 

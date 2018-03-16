@@ -20,10 +20,6 @@ public class RoadLocation extends Location {
 		super(name, latitude, longitude);
 	}
 
-	public void setTravelDistanceMap(Map<RoadLocation, Long> travelDistanceMap) {
-		this.travelDistanceMap = travelDistanceMap;
-	}
-
 	@Override
 	public long getDistanceTo(Location location) {
 		if (this == location) {
@@ -31,8 +27,12 @@ public class RoadLocation extends Location {
 		}
 
 		RoadLocation roadLocation = (RoadLocation) location;
-		long time = travelDistanceMap.get(roadLocation);
+		long time = this.travelDistanceMap.get(roadLocation);
 
 		return LocationTimeUtility.secondsToMillisecond(time);
+	}
+
+	public void setTravelDistanceMap(Map<RoadLocation, Long> travelDistanceMap) {
+		this.travelDistanceMap = travelDistanceMap;
 	}
 }

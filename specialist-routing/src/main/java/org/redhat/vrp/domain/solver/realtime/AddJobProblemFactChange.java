@@ -13,30 +13,31 @@ public class AddJobProblemFactChange implements ProblemFactChange<SpecialistRout
 
 	public AddJobProblemFactChange() {
 		super();
-		job = null;
+		this.job = null;
 	}
 
 	public AddJobProblemFactChange(Job job) {
 		this.job = job;
 	}
 
-	public Job getJob() {
-		return job;
-	}
-
-	public void setJob(Job job) {
-		this.job = job;
-	}
-
+	@Override
 	public void doChange(ScoreDirector<SpecialistRoutingSolution> scoreDirector) {
 		SpecialistRoutingSolution solution = scoreDirector.getWorkingSolution();
 
 		solution.setJobList(new ArrayList<Job>(solution.getJobList()));
 
 		// Add the problem fact itself
-		scoreDirector.beforeProblemFactAdded(job);
-		solution.addProficienciesAndLocation(job);
-		scoreDirector.afterProblemFactAdded(job);
+		scoreDirector.beforeProblemFactAdded(this.job);
+		solution.addProficienciesAndLocation(this.job);
+		scoreDirector.afterProblemFactAdded(this.job);
+	}
+
+	public Job getJob() {
+		return this.job;
+	}
+
+	public void setJob(Job job) {
+		this.job = job;
 	}
 
 }

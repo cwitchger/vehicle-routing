@@ -10,43 +10,43 @@ public class Home {
 
 	private long windowEnd;
 
+	/**
+	 * The jobOrSpecialist parameter must never be null
+	 */
+	public long getDistanceTo(JobOrSpecialist jobOrSpecialist) {
+		return this.location.getDistanceTo(jobOrSpecialist.getLocation());
+	}
+
 	public Location getLocation() {
-		return location;
+		return this.location;
+	}
+
+	public long getWindowEnd() {
+		return this.windowEnd;
+	}
+
+	public long getWindowStart() {
+		return this.windowStart;
 	}
 
 	public void setLocation(Location location) {
 		this.location = location;
 	}
 
-	public long getWindowStart() {
-		return windowStart;
+	public void setWindowEnd(long windowEnd) {
+		this.windowEnd = windowEnd;
 	}
 
 	public void setWindowStart(long windowStart) {
 		this.windowStart = windowStart;
 	}
 
-	public long getWindowEnd() {
-		return windowEnd;
-	}
-
-	public void setWindowEnd(long windowEnd) {
-		this.windowEnd = windowEnd;
-	}
-
 	@Override
 	public String toString() {
-		if (location.getName() == null) {
+		if (this.location.getName() == null) {
 			return super.toString();
 		}
-		return location.getName();
-	}
-
-	/**
-	 * The jobOrSpecialist parameter must never be null
-	 */
-	public long getDistanceTo(JobOrSpecialist jobOrSpecialist) {
-		return location.getDistanceTo(jobOrSpecialist.getLocation());
+		return this.location.getName();
 	}
 
 }
