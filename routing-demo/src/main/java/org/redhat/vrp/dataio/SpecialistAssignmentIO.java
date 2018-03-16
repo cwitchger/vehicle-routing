@@ -18,12 +18,11 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.optaplanner.persistence.common.api.domain.solution.SolutionFileIO;
-
-import org.redhat.vrp.domain.Job;
 import org.redhat.vrp.domain.Home;
-import org.redhat.vrp.domain.Specialist;
+import org.redhat.vrp.domain.Job;
 import org.redhat.vrp.domain.LocationTimeUtility;
 import org.redhat.vrp.domain.Skill;
+import org.redhat.vrp.domain.Specialist;
 import org.redhat.vrp.domain.SpecialistRoutingSolution;
 import org.redhat.vrp.domain.location.AirLocation;
 import org.redhat.vrp.domain.location.DistanceType;
@@ -53,6 +52,49 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 
 	public static String distanceMatrix = "distance-matrix.json";
 
+	private static Map<String, Skill> allSkills = new HashMap<String, Skill>(10);
+
+	private static Set<Skill> getSkillSet(String skills) {
+		Set<Skill> skillList = new HashSet<Skill>(10);
+		StringTokenizer tokenizer = new StringTokenizer(skills, ",");
+
+		while (tokenizer.hasMoreTokens()) {
+			String skillName = tokenizer.nextToken();
+			Skill skill = allSkills.get(skillName);
+			if (skill == null) {
+				skill = new Skill(skillName);
+			}
+
+			skillList.add(skill);
+		}
+
+		return skillList;
+	}
+
+	/**
+	 * Loads the specialist and job data using the file names and folder
+	 * provided
+	 */
+	public static SpecialistRoutingSolution loadAllData(String dataFolderPath, String specialistFilename,
+			String jobsFilename, DistanceType distanceType) {
+		File dataFolder = new File(dataFolderPath);
+
+		// Initializes the solution with some default data
+		SpecialistRoutingSolution specialistPlan = new SpecialistRoutingSolution();
+		specialistPlan.setDistanceUnitOfMeasurement(UNIT_OF_MEASUREMENT);
+		specialistPlan.setDistanceType(distanceType);
+
+		// Load all of the jobs that need to be worked
+		List<Job> jobs = loadJobData(dataFolder, jobsFilename, distanceType);
+		specialistPlan.setJobList(jobs);
+
+		// Load all of the specialist that are worked
+		List<Specialist> specialistList = loadSpecialistData(dataFolder, specialistFilename, distanceType);
+		specialistPlan.setSpecialistList(specialistList);
+
+		return specialistPlan;
+	}
+
 	/**
 	 * Loads the specialist and job data using the default filenames.
 	 */
@@ -79,27 +121,57 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 	}
 
 	/**
-	 * Loads the specialist and job data using the file names and folder
-	 * provided
+	 * Loads the job data using the java Scanner. The data should be a tab
+	 * delimited list in the following order. 0 - job id. 1 - skill type. 2 -
+	 * job latitude. 3 - job longitude.
 	 */
-	public static SpecialistRoutingSolution loadAllData(String dataFolderPath, String specialistFilename,
-			String jobsFilename, DistanceType distanceType) {
-		File dataFolder = new File(dataFolderPath);
+	private static List<Job> loadJobData(File dataFolder, String jobFilename, DistanceType distanceType) {
+		File specialistFile = new File(dataFolder, jobFilename);
+		List<Job> jobs = new ArrayList<Job>();
 
-		// Initializes the solution with some default data
-		SpecialistRoutingSolution specialistPlan = new SpecialistRoutingSolution();
-		specialistPlan.setDistanceUnitOfMeasurement(UNIT_OF_MEASUREMENT);
-		specialistPlan.setDistanceType(distanceType);
+		Scanner scanner = null;
+		try {
+			scanner = new Scanner(specialistFile);
 
-		// Load all of the jobs that need to be worked
-		List<Job> jobs = loadJobData(dataFolder, jobsFilename, distanceType);
-		specialistPlan.setJobList(jobs);
+			while (scanner.hasNextLine()) {
+				String[] tokens = scanner.nextLine().split(DATA_DELIMITER);
 
-		// Load all of the specialist that are worked
-		List<Specialist> specialistList = loadSpecialistData(dataFolder, specialistFilename, distanceType);
-		specialistPlan.setSpecialistList(specialistList);
+				// Create specialist with home latitude and longitude
+				Double latitude = Double.valueOf(tokens[2]);
+				Double longitude = Double.valueOf(tokens[3]);
+				Long serviceDuration = (long) (Double.valueOf(tokens[4]) * LocationTimeUtility.MINUTES_TO_MILLISECONDS);
 
-		return specialistPlan;
+				Set<Skill> skills = getSkillSet(tokens[1]);
+
+				Job job = new Job();
+				job.setJobId(tokens[0]);
+				job.setRequiredSkills(skills);
+
+				if (distanceType == DistanceType.ROAD_DISTANCE) {
+					job.setLocation(new RoadLocation(tokens[0], latitude, longitude));
+				} else {
+					job.setLocation(new AirLocation(tokens[0], latitude, longitude));
+				}
+				job.setServiceDuration(serviceDuration);
+
+				Long windowStart = DATE_FORMAT.parse(WORKING_DAY + " " + DAY_START).getTime();
+				Long windowEnd = DATE_FORMAT.parse(WORKING_DAY + " " + DAY_END).getTime();
+				job.setWindowStart(windowStart);
+				job.setWindowEnd(windowEnd);
+
+				jobs.add(job);
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} finally {
+			if (scanner != null) {
+				scanner.close();
+			}
+		}
+
+		return jobs;
 	}
 
 	/**
@@ -157,77 +229,19 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 		return specialists;
 	}
 
-	private static Map<String, Skill> allSkills = new HashMap<String, Skill>(10);
+	public static void printAll(SpecialistRoutingSolution solution, File file) {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-	private static Set<Skill> getSkillSet(String skills) {
-		Set<Skill> skillList = new HashSet<Skill>(10);
-		StringTokenizer tokenizer = new StringTokenizer(skills, ",");
+		SchedulePrinter.print(solution);
 
-		while (tokenizer.hasMoreTokens()) {
-			String skillName = tokenizer.nextToken();
-			Skill skill = allSkills.get(skillName);
-			if (skill == null) {
-				skill = new Skill(skillName);
-			}
-
-			skillList.add(skill);
-		}
-
-		return skillList;
-	}
-
-	/**
-	 * Loads the job data using the java Scanner. The data should be a tab
-	 * delimited list in the following order. 0 - job id. 1 - skill type. 2 -
-	 * job latitude. 3 - job longitude.
-	 */
-	private static List<Job> loadJobData(File dataFolder, String jobFilename, DistanceType distanceType) {
-		File specialistFile = new File(dataFolder, jobFilename);
-		List<Job> jobs = new ArrayList<Job>();
-
-		Scanner scanner = null;
-		try {
-			scanner = new Scanner(specialistFile);
-
-			while (scanner.hasNextLine()) {
-				String[] tokens = scanner.nextLine().split(DATA_DELIMITER);
-
-				// Create specialist with home latitude and longitude
-				Double latitude = Double.valueOf(tokens[2]);
-				Double longitude = Double.valueOf(tokens[3]);
-				Long serviceDuration = (long) (Double.valueOf(tokens[4]) * LocationTimeUtility.MINUTES_TO_MILLISECONDS);
-
-				Set<Skill> skills = getSkillSet(tokens[1]);
-
-				Job job = new Job();
-				job.setJobId(tokens[0]);
-				job.setRequiredSkills(skills);
-
-				if (distanceType == DistanceType.ROAD_DISTANCE) {
-					job.setLocation(new RoadLocation(tokens[0], latitude, longitude));
-				} else {
-					job.setLocation(new AirLocation(tokens[0], latitude, longitude));
-				}
-				job.setServiceDuration(serviceDuration);
-
-				Long windowStart = DATE_FORMAT.parse(WORKING_DAY + " " + DAY_START).getTime();
-				Long windowEnd = DATE_FORMAT.parse(WORKING_DAY + " " + DAY_END).getTime();
-				job.setWindowStart(windowStart);
-				job.setWindowEnd(windowEnd);
-
-				jobs.add(job);
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		} finally {
-			if (scanner != null) {
-				scanner.close();
+		if (file != null) {
+			try {
+				mapper.writeValue(new FileOutputStream(file), solution);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
-
-		return jobs;
 	}
 
 	@Override
@@ -251,21 +265,6 @@ public class SpecialistAssignmentIO implements SolutionFileIO<SpecialistRoutingS
 	@Override
 	public void write(SpecialistRoutingSolution solution, File file) {
 		printAll(solution, file);
-	}
-
-	public static void printAll(SpecialistRoutingSolution solution, File file) {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-		SchedulePrinter.print(solution);
-
-		if (file != null) {
-			try {
-				mapper.writeValue(new FileOutputStream(file), solution);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 }

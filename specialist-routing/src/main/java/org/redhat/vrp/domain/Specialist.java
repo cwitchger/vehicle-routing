@@ -19,63 +19,50 @@ public class Specialist implements JobOrSpecialist {
 
 	private Set<Skill> skills;
 
-	public Set<Skill> getSkills() {
-		return skills;
-	}
-
-	public void setSkills(Set<Skill> skills) {
-		this.skills = skills;
-	}
-
-	public String getSpecialistId() {
-		return specialistId;
-	}
-
-	public void setSpecialistId(String specialistId) {
-		this.specialistId = specialistId;
+	/**
+	 * The jobOrSpecialist parameter can not be null
+	 */
+	public long getDistanceTo(JobOrSpecialist jobOrSpecialist) {
+		return this.home.getDistanceTo(jobOrSpecialist);
 	}
 
 	public Home getHome() {
-		return home;
+		return this.home;
 	}
 
-	public void setHome(Home home) {
-		this.home = home;
+	@Override
+	public Location getLocation() {
+		return this.home.getLocation();
 	}
 
+	@Override
 	public Job getNextJob() {
-		return nextJob;
+		return this.nextJob;
 	}
 
-	public void setNextJob(Job nextJob) {
-		this.nextJob = nextJob;
+	public Set<Skill> getSkills() {
+		return this.skills;
 	}
 
+	@Override
 	@JsonProperty(access = Access.WRITE_ONLY)
 	public Specialist getSpecialist() {
 		return this;
 	}
 
-	public Location getLocation() {
-		return home.getLocation();
-	}
-
-	/**
-	 * The jobOrSpecialist parameter can not be null
-	 */
-	public long getDistanceTo(JobOrSpecialist jobOrSpecialist) {
-		return home.getDistanceTo(jobOrSpecialist);
+	public String getSpecialistId() {
+		return this.specialistId;
 	}
 
 	public long getTotalWorkingHours() {
 		long totalTime = 0;
-		Job last = nextJob;
-		if (nextJob != null) {
+		Job last = this.nextJob;
+		if (this.nextJob != null) {
 			while (true) {
 				if (last.getNextJob() != null) {
 					last = last.getNextJob();
 				} else {
-					totalTime = last.getDepartureTime() - nextJob.getArrivalTime();
+					totalTime = last.getDepartureTime() - this.nextJob.getArrivalTime();
 					break;
 				}
 			}
@@ -87,16 +74,33 @@ public class Specialist implements JobOrSpecialist {
 	@JsonProperty(access = Access.WRITE_ONLY)
 	public Long getTotalWorkingMilliseconds() {
 		long totalTime = 0;
-		Job last = nextJob;
+		Job last = this.nextJob;
 		while (true) {
 			if (last.getNextJob() != null) {
 				last = last.getNextJob();
 			} else {
-				totalTime = last.getDepartureTime() - nextJob.getArrivalTime();
+				totalTime = last.getDepartureTime() - this.nextJob.getArrivalTime();
 				break;
 			}
 		}
 		return totalTime;
+	}
+
+	public void setHome(Home home) {
+		this.home = home;
+	}
+
+	@Override
+	public void setNextJob(Job nextJob) {
+		this.nextJob = nextJob;
+	}
+
+	public void setSkills(Set<Skill> skills) {
+		this.skills = skills;
+	}
+
+	public void setSpecialistId(String specialistId) {
+		this.specialistId = specialistId;
 	}
 
 	@Override

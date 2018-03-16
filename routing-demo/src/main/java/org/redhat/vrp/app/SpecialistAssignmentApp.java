@@ -1,7 +1,6 @@
 package org.redhat.vrp.app;
 
 import org.optaplanner.core.api.solver.Solver;
-
 import org.redhat.vrp.dataio.SpecialistAssignmentIO;
 import org.redhat.vrp.domain.SpecialistRoutingSolution;
 
@@ -11,17 +10,17 @@ import org.redhat.vrp.domain.SpecialistRoutingSolution;
  */
 public class SpecialistAssignmentApp {
 
-	public String outputDataFile = SpecialistAssignmentIO.DATA_FOLDER_PATH + "/output/response.json";
-
-	private SpecialistRoutingSolution specialistPlan;
-
 	public static void main(String[] args) {
 		SpecialistAssignmentApp vrpApp = new SpecialistAssignmentApp();
 		vrpApp.solve();
 	}
 
+	public String outputDataFile = SpecialistAssignmentIO.DATA_FOLDER_PATH + "/output/response.json";
+
+	private SpecialistRoutingSolution specialistPlan;
+
 	public SpecialistAssignmentApp() {
-		specialistPlan = SpecialistAssignmentIO.loadData(SpecialistAssignmentIO.DATA_FOLDER_PATH);
+		this.specialistPlan = SpecialistAssignmentIO.loadData(SpecialistAssignmentIO.DATA_FOLDER_PATH);
 	}
 
 	/**
@@ -29,7 +28,7 @@ public class SpecialistAssignmentApp {
 	 */
 	private void solve() {
 		Solver<SpecialistRoutingSolution> solver = AppHelper.getSolverFactory().buildSolver();
-		SpecialistRoutingSolution solution = solver.solve(specialistPlan);
+		SpecialistRoutingSolution solution = solver.solve(this.specialistPlan);
 
 		SpecialistAssignmentIO.printAll(solution, null);
 	}

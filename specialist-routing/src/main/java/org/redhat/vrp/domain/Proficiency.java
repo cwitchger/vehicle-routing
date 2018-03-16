@@ -16,51 +16,58 @@ public class Proficiency {
 		this.skill = skill;
 	}
 
-	public Skill getSkill() {
-		return skill;
-	}
-
-	public void setSkill(Skill skill) {
-		this.skill = skill;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Proficiency other = (Proficiency) obj;
+		if (this.job == null) {
+			if (other.job != null) {
+				return false;
+			}
+		} else if (!this.job.equals(other.job)) {
+			return false;
+		}
+		if (this.skill == null) {
+			if (other.skill != null) {
+				return false;
+			}
+		} else if (!this.skill.equals(other.skill)) {
+			return false;
+		}
+		return true;
 	}
 
 	public Job getJob() {
-		return job;
+		return this.job;
 	}
 
-	public void setJob(Job job) {
-		this.job = job;
+	public Skill getSkill() {
+		return this.skill;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((job == null) ? 0 : job.hashCode());
-		result = prime * result + ((skill == null) ? 0 : skill.hashCode());
+		result = prime * result + ((this.job == null) ? 0 : this.job.hashCode());
+		result = prime * result + ((this.skill == null) ? 0 : this.skill.hashCode());
 		return result;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Proficiency other = (Proficiency) obj;
-		if (job == null) {
-			if (other.job != null)
-				return false;
-		} else if (!job.equals(other.job))
-			return false;
-		if (skill == null) {
-			if (other.skill != null)
-				return false;
-		} else if (!skill.equals(other.skill))
-			return false;
-		return true;
+	public void setJob(Job job) {
+		this.job = job;
+	}
+
+	public void setSkill(Skill skill) {
+		this.skill = skill;
 	}
 
 }

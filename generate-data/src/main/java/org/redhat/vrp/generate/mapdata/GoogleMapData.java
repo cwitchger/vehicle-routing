@@ -26,6 +26,30 @@ public class GoogleMapData {
 	private static String INPUT_DIR = "../routing-demo/data/small/";
 	private static String OUTPUT_DIR = "data/distance-matrix.json";
 
+	private static List<Location> getAllLocations() {
+		SpecialistRoutingSolution specialistPlan = SpecialistAssignmentIO.loadData(INPUT_DIR);
+		List<Home> homeList = specialistPlan.getHomeList();
+		List<Location> locations = homeList.stream().map(Home::getLocation).collect(Collectors.toList());
+		locations.addAll(specialistPlan.getLocationList());
+		return locations;
+	}
+
+	private static Long getTravelTime(GeoApiContext context, String origin, String destination) {
+		DirectionsApiRequest request = DirectionsApi.getDirections(context, origin, destination);
+
+		Long time = 0L;
+		try {
+			DirectionsResult result = request.await();
+			time = result.routes[0].legs[0].duration.inSeconds;
+		} catch (ApiException | InterruptedException | IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			time = 9999999L;
+		}
+
+		return time;
+	}
+
 	public static void main(String[] args) {
 		Builder builder = new Builder();
 		builder.apiKey(API_KEY);
@@ -54,29 +78,5 @@ public class GoogleMapData {
 			e.printStackTrace();
 		}
 
-	}
-
-	private static List<Location> getAllLocations() {
-		SpecialistRoutingSolution specialistPlan = SpecialistAssignmentIO.loadData(INPUT_DIR);
-		List<Home> homeList = specialistPlan.getHomeList();
-		List<Location> locations = homeList.stream().map(Home::getLocation).collect(Collectors.toList());
-		locations.addAll(specialistPlan.getLocationList());
-		return locations;
-	}
-
-	private static Long getTravelTime(GeoApiContext context, String origin, String destination) {
-		DirectionsApiRequest request = DirectionsApi.getDirections(context, origin, destination);
-
-		Long time = 0L;
-		try {
-			DirectionsResult result = request.await();
-			time = result.routes[0].legs[0].duration.inSeconds;
-		} catch (ApiException | InterruptedException | IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			time = 9999999L;
-		}
-
-		return time;
 	}
 }

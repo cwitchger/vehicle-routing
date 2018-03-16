@@ -34,18 +34,19 @@ end
 // Soft constraints
 // ############################################################################
 
-rule "Specialists should arrive as close to the start time as possible"
+rule "A specialist's skills should match the job requirements"
     when
-        Job(windowStart != 0, windowStart < arrivalTime, $windowStart : windowStart, $arrivalTime : arrivalTime)
+      	$job : Job( $specialist : specialist != null, $requiredSkills : requiredSkills != null )
+      	not Proficiency( job == $job, skill memberOf $specialist )
     then
-        scoreHolder.addSoftConstraintMatch(kcontext, $windowStart - $arrivalTime.longValue());
+        scoreHolder.addSoftConstraintMatch(kcontext, - 1);
 end
 
-rule "Specialists should not arrive early and wait for long periods of time"
+rule "Specialists should arrive as close to the start time as possible"
     when
-        Job(windowStart != 0, arrivalTime < windowStart, $windowStart : windowStart, $arrivalTime : arrivalTime)
+        Job(windowStart != 0, windowStart != arrivalTime, $windowStart : windowStart, $arrivalTime : arrivalTime)
     then
-        scoreHolder.addSoftConstraintMatch(kcontext, $arrivalTime.longValue() - $windowStart);
+        scoreHolder.addSoftConstraintMatch(kcontext, - Math.abs($windowStart - $arrivalTime.longValue()));
 end
 
 rule "Minimize Distance: Distance from previous job"
@@ -62,14 +63,6 @@ rule "Minimize Distance: Distance from last job to home"
         scoreHolder.addSoftConstraintMatch(kcontext, - $job.getDistanceTo($specialist));
 end
 
-rule "A specialist's skills should match the job requirements"
-    when
-      	$job : Job( $specialist : specialist != null, $requiredSkills : requiredSkills != null )    
-      	not Proficiency( job == $job, skill memberOf $specialist ) 
-    then
-        scoreHolder.addSoftConstraintMatch(kcontext, - 1);
-end
-
 rule "Specialists should not work past their scheduled ending time"
     when
         Job( $specialist : specialist, $departureTime : departureTime != null, departureTime > $specialist.home.windowEnd )
@@ -77,7 +70,7 @@ rule "Specialists should not work past their scheduled ending time"
         scoreHolder.addSoftConstraintMatch(kcontext, $specialist.getHome().getWindowEnd() - $departureTime);
 end
 
-rule "Specialists should not work more than than eight hour days"
+rule "Specialists should not work more than an eight hour days"
     when
         Specialist( nextJob != null, $totalWorkingHours : totalWorkingMilliseconds > 28800000  )
     then

@@ -8,7 +8,6 @@ import org.optaplanner.core.api.domain.variable.CustomShadowVariable;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
 import org.optaplanner.core.api.domain.variable.PlanningVariableGraphType;
 import org.optaplanner.core.api.domain.variable.PlanningVariableReference;
-
 import org.redhat.vrp.domain.location.Location;
 import org.redhat.vrp.domain.solver.ArrivalTimeUpdatingVariableListener;
 
@@ -34,14 +33,6 @@ public class Job implements JobOrSpecialist {
 
 	private Set<Skill> requiredSkills;
 
-	public Set<Skill> getRequiredSkills() {
-		return requiredSkills;
-	}
-
-	public void setRequiredSkills(Set<Skill> requiredSkills) {
-		this.requiredSkills = requiredSkills;
-	}
-
 	// Shadow variable
 	private Long arrivalTime;
 
@@ -50,145 +41,93 @@ public class Job implements JobOrSpecialist {
 
 	// Shadow variables
 	protected Job nextJob;
-	
-	@JsonProperty(access = Access.WRITE_ONLY)
-	@PlanningVariable(valueRangeProviderRefs = { "specialistRange",
-			"jobRange" }, graphType = PlanningVariableGraphType.CHAINED)
-	public JobOrSpecialist getPreviousJobOrSpecialist() {
-		return previousJobOrSpecialist;
-	}
 
-	public void setPreviousJobOrSpecialist(JobOrSpecialist previousJobOrSpecialist) {
-		this.previousJobOrSpecialist = previousJobOrSpecialist;
-	}
-
-	@AnchorShadowVariable(sourceVariableName = "previousJobOrSpecialist")
-	public Specialist getSpecialist() {
-		return specialist;
-	}
-
-	public void setSpecialist(Specialist specialist) {
-		this.specialist = specialist;
-	}
-
-	@CustomShadowVariable(variableListenerClass = ArrivalTimeUpdatingVariableListener.class, sources = {
-			@PlanningVariableReference(variableName = "previousJobOrSpecialist") })
+	@CustomShadowVariable(variableListenerClass = ArrivalTimeUpdatingVariableListener.class,
+			sources = { @PlanningVariableReference(variableName = "previousJobOrSpecialist") })
 	public Long getArrivalTime() {
-		return arrivalTime;
+		return this.arrivalTime;
 	}
 
-	public void setArrivalTime(Long arrivalTime) {
-		this.arrivalTime = arrivalTime;
-	}
-
-	public String getJobId() {
-		return jobId;
-	}
-
-	public void setJobId(String jobId) {
-		this.jobId = jobId;
-	}
-
-	
-	public Location getLocation() {
-		return location;
-	}
-
-	public void setLocation(Location location) {
-		this.location = location;
-	}
-
-	public Job getNextJob() {
-		return nextJob;
-	}
-
-	public void setNextJob(Job nextJob) {
-		this.nextJob = nextJob;
-	}
-
-	public long getWindowStart() {
-		return windowStart;
-	}
-
-	public void setWindowStart(long windowStart) {
-		this.windowStart = windowStart;
-	}
-
-	public long getWindowEnd() {
-		return windowEnd;
-	}
-
-	public void setWindowEnd(long windowEnd) {
-		this.windowEnd = windowEnd;
-	}
-
-	public long getServiceDuration() {
-		return serviceDuration;
-	}
-
-	public void setServiceDuration(long serviceDuration) {
-		this.serviceDuration = serviceDuration;
-	}
-
-	@Override
-	public String toString() {
-		if (location.getName() == null) {
-			return super.toString();
+	/**
+	 * This method adds a hard constraint saying that a specialist cannot start
+	 * working till the start time.
+	 */
+	public Long getDepartureTime() {
+		if (this.arrivalTime == null) {
+			return null;
 		}
-		return location.getName();
-	}
-
-	@JsonProperty(access = Access.WRITE_ONLY)
-	public long getDistanceFromPreviousJobOrSpecialist() {
-		if (previousJobOrSpecialist == null) {
-			throw new IllegalStateException("This method must not be called when the previousJobOrSpecialist ("
-					+ previousJobOrSpecialist + ") is not initialized yet.");
-		}
-		return getDistanceFrom(previousJobOrSpecialist);
+		return Math.max(this.arrivalTime, this.windowStart) + this.serviceDuration;
 	}
 
 	/**
 	 * The jobOrSpecialist parameter can not be null
 	 */
 	public long getDistanceFrom(JobOrSpecialist jobOrSpecialist) {
-		return jobOrSpecialist.getLocation().getDistanceTo(location);
+		return jobOrSpecialist.getLocation().getDistanceTo(this.location);
+	}
+
+	@JsonProperty(access = Access.WRITE_ONLY)
+	public long getDistanceFromPreviousJobOrSpecialist() {
+		if (this.previousJobOrSpecialist == null) {
+			throw new IllegalStateException("This method must not be called when the previousJobOrSpecialist ("
+					+ this.previousJobOrSpecialist + ") is not initialized yet.");
+		}
+		return getDistanceFrom(this.previousJobOrSpecialist);
 	}
 
 	/**
 	 * The jobOrSpecialist parameter can not be null
 	 */
 	public long getDistanceTo(JobOrSpecialist jobOrSpecialist) {
-		return location.getDistanceTo(jobOrSpecialist.getLocation());
+		return this.location.getDistanceTo(jobOrSpecialist.getLocation());
+	}
+
+	public String getJobId() {
+		return this.jobId;
+	}
+
+	@Override
+	public Location getLocation() {
+		return this.location;
+	}
+
+	@Override
+	public Job getNextJob() {
+		return this.nextJob;
+	}
+
+	@JsonProperty(access = Access.WRITE_ONLY)
+	@PlanningVariable(valueRangeProviderRefs = { "specialistRange", "jobRange" },
+			graphType = PlanningVariableGraphType.CHAINED)
+	public JobOrSpecialist getPreviousJobOrSpecialist() {
+		return this.previousJobOrSpecialist;
+	}
+
+	public Set<Skill> getRequiredSkills() {
+		return this.requiredSkills;
+	}
+
+	public long getServiceDuration() {
+		return this.serviceDuration;
+	}
+
+	@Override
+	@AnchorShadowVariable(sourceVariableName = "previousJobOrSpecialist")
+	public Specialist getSpecialist() {
+		return this.specialist;
 	}
 
 	/**
-	 * This method adds a hard constraint saying that a specialist cannot start working till the start time.
-	 */
-	public Long getDepartureTime() {
-		if (arrivalTime == null) {
-			return null;
-		}
-		return Math.max(arrivalTime, windowStart) + serviceDuration;
-	}
-
-	public boolean isArrivalBeforeWindowStart() {
-		return arrivalTime != null && windowEnd != 0 && arrivalTime < windowStart;
-	}
-
-	public boolean isArrivalAfterWindowEnd() {
-		return arrivalTime != null && windowEnd != 0 && windowEnd < arrivalTime;
-	}
-
-	/**
-	 * Calculates the difference in time if the arrival time is earlier than desired or later than desired
+	 * Calculates the difference in time if the arrival time is earlier than
+	 * desired or later than desired
 	 */
 	public long getTimeOutsideOfWindow() {
 		long timeOutsideOfWindow = 0L;
 
 		if (isArrivalBeforeWindowStart()) {
-			timeOutsideOfWindow = arrivalTime - windowStart;
+			timeOutsideOfWindow = this.arrivalTime - this.windowStart;
 		} else if (isArrivalAfterWindowEnd()) {
-			timeOutsideOfWindow = windowEnd - arrivalTime;
+			timeOutsideOfWindow = this.windowEnd - this.arrivalTime;
 		}
 
 		return timeOutsideOfWindow;
@@ -198,18 +137,83 @@ public class Job implements JobOrSpecialist {
 	 * There could be an added weight to the distance
 	 */
 	public long getTimeWindowGapTo(Job other) {
-		long latestDepartureTime = arrivalTime + serviceDuration;
+		long latestDepartureTime = this.arrivalTime + this.serviceDuration;
 		long otherLatestDepartureTime = other.getArrivalTime() + other.getServiceDuration();
 
 		if (latestDepartureTime < other.getWindowStart()) {
 			return other.getWindowStart() - latestDepartureTime;
 		}
 
-		if (otherLatestDepartureTime < windowStart) {
-			return windowStart - otherLatestDepartureTime;
+		if (otherLatestDepartureTime < this.windowStart) {
+			return this.windowStart - otherLatestDepartureTime;
 		}
 
 		return 0L;
+	}
+
+	public long getWindowEnd() {
+		return this.windowEnd;
+	}
+
+	public long getWindowStart() {
+		return this.windowStart;
+	}
+
+	public boolean isArrivalAfterWindowEnd() {
+		return this.arrivalTime != null && this.windowEnd != 0 && this.windowEnd < this.arrivalTime;
+	}
+
+	public boolean isArrivalBeforeWindowStart() {
+		return this.arrivalTime != null && this.windowEnd != 0 && this.arrivalTime < this.windowStart;
+	}
+
+	public void setArrivalTime(Long arrivalTime) {
+		this.arrivalTime = arrivalTime;
+	}
+
+	public void setJobId(String jobId) {
+		this.jobId = jobId;
+	}
+
+	public void setLocation(Location location) {
+		this.location = location;
+	}
+
+	@Override
+	public void setNextJob(Job nextJob) {
+		this.nextJob = nextJob;
+	}
+
+	public void setPreviousJobOrSpecialist(JobOrSpecialist previousJobOrSpecialist) {
+		this.previousJobOrSpecialist = previousJobOrSpecialist;
+	}
+
+	public void setRequiredSkills(Set<Skill> requiredSkills) {
+		this.requiredSkills = requiredSkills;
+	}
+
+	public void setServiceDuration(long serviceDuration) {
+		this.serviceDuration = serviceDuration;
+	}
+
+	public void setSpecialist(Specialist specialist) {
+		this.specialist = specialist;
+	}
+
+	public void setWindowEnd(long windowEnd) {
+		this.windowEnd = windowEnd;
+	}
+
+	public void setWindowStart(long windowStart) {
+		this.windowStart = windowStart;
+	}
+
+	@Override
+	public String toString() {
+		if (this.location.getName() == null) {
+			return super.toString();
+		}
+		return this.location.getName();
 	}
 
 }

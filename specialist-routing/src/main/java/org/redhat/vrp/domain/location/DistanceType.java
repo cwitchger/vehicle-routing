@@ -5,3 +5,4 @@ public enum DistanceType {
     ROAD_DISTANCE,
     SEGMENTED_ROAD_DISTANCE;
 }
+ 

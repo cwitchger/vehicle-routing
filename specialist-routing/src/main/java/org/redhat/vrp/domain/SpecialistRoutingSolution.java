@@ -54,101 +54,25 @@ public class SpecialistRoutingSolution {
 	@XStreamConverter(HardSoftLongScoreXStreamConverter.class)
 	protected HardSoftLongScore score;
 
-	public DistanceType getDistanceType() {
-		return distanceType;
-	}
+	private void addDistancesToLocations() {
+		if (this.locationList != null && this.homeList != null && this.distanceMatrix != null) {
 
-	public void setDistanceType(DistanceType distanceType) {
-		this.distanceType = distanceType;
-	}
+			List<Location> locations = getAllLocations();
+			for (Location from : locations) {
+				Map<String, Long> distanceRow = this.distanceMatrix.get(from.getName());
+				Map<RoadLocation, Long> distanceMap = new HashMap<RoadLocation, Long>();
+				RoadLocation fromRoad = (RoadLocation) from;
 
-	public String getDistanceUnitOfMeasurement() {
-		return distanceUnitOfMeasurement;
-	}
+				for (Location to : locations) {
+					RoadLocation toRoad = (RoadLocation) to;
 
-	public void setDistanceUnitOfMeasurement(String distanceUnitOfMeasurement) {
-		this.distanceUnitOfMeasurement = distanceUnitOfMeasurement;
-	}
+					long time = distanceRow.get(to.getName());
+					distanceMap.put(toRoad, time);
+				}
 
-	@JsonProperty(access = Access.WRITE_ONLY)
-	public List<Location> getLocationList() {
-		return locationList;
-	}
-
-	public void setLocationList(List<Location> locationList) {
-		this.locationList = locationList;
-	}
-
-	@JsonProperty(access = Access.WRITE_ONLY)
-	public List<Home> getHomeList() {
-		return homeList;
-	}
-
-	public void setHomeList(List<Home> homeList) {
-		this.homeList = homeList;
-	}
-
-	public List<Specialist> getSpecialistList() {
-		return specialistList;
-	}
-
-	public void setSpecialistList(List<Specialist> specialistList) {
-		this.specialistList = specialistList;
-
-		updateHomeList();
-		addDistancesToLocations();
-	}
-
-	public List<Job> getJobList() {
-		return jobList;
-	}
-
-	public void setJobList(List<Job> jobList) {
-		this.jobList = jobList;
-
-		addProblemFactsForJobs();
-		addDistancesToLocations();
-	}
-
-	public HardSoftLongScore getScore() {
-		return score;
-	}
-
-	public void setScore(HardSoftLongScore score) {
-		this.score = score;
-	}
-
-	@JsonProperty(access = Access.WRITE_ONLY)
-	public List<Proficiency> getProficiencies() {
-		return proficiencies;
-	}
-
-	public void setProficiencies(List<Proficiency> proficiencies) {
-		this.proficiencies = proficiencies;
-	}
-
-	public void setDistanceMatrix(Map<String, Map<String, Long>> distanceMatrix) {
-		this.distanceMatrix = distanceMatrix;
-		addDistancesToLocations();
-	}
-
-	/**
-	 * Gathers the specialists home locations from the specialist list and adds
-	 * to the solution
-	 */
-	private void updateHomeList() {
-		this.homeList = this.specialistList.stream().map(Specialist::getHome).collect(Collectors.toList());
-	}
-
-	/**
-	 * Gathers the job locations from the job list and adds to the solution
-	 */
-	private void addToLocationList(Location location) {
-		if (this.locationList == null) {
-			this.locationList = new ArrayList<Location>();
+				fromRoad.setTravelDistanceMap(distanceMap);
+			}
 		}
-
-		this.locationList.add(location);
 	}
 
 	/**
@@ -170,30 +94,106 @@ public class SpecialistRoutingSolution {
 		addToLocationList(job.getLocation());
 	}
 
-	private void addDistancesToLocations() {
-		if (locationList != null && homeList != null && distanceMatrix != null) {
-			
-			List<Location> locations = getAllLocations();
-			for (Location from : locations) {
-				Map<String, Long> distanceRow = distanceMatrix.get(from.getName());
-				Map<RoadLocation, Long> distanceMap = new HashMap<RoadLocation, Long>();
-				RoadLocation fromRoad = (RoadLocation) from;
-
-				for (Location to : locations) {
-					RoadLocation toRoad = (RoadLocation) to;
-
-					long time = distanceRow.get(to.getName());
-					distanceMap.put(toRoad, time);
-				}
-
-				fromRoad.setTravelDistanceMap(distanceMap);
-			}
+	/**
+	 * Gathers the job locations from the job list and adds to the solution
+	 */
+	private void addToLocationList(Location location) {
+		if (this.locationList == null) {
+			this.locationList = new ArrayList<Location>();
 		}
+
+		this.locationList.add(location);
 	}
 
 	private List<Location> getAllLocations() {
 		List<Location> locations = this.homeList.stream().map(Home::getLocation).collect(Collectors.toList());
 		locations.addAll(this.locationList);
 		return locations;
+	}
+
+	public DistanceType getDistanceType() {
+		return this.distanceType;
+	}
+
+	public String getDistanceUnitOfMeasurement() {
+		return this.distanceUnitOfMeasurement;
+	}
+
+	@JsonProperty(access = Access.WRITE_ONLY)
+	public List<Home> getHomeList() {
+		return this.homeList;
+	}
+
+	public List<Job> getJobList() {
+		return this.jobList;
+	}
+
+	@JsonProperty(access = Access.WRITE_ONLY)
+	public List<Location> getLocationList() {
+		return this.locationList;
+	}
+
+	@JsonProperty(access = Access.WRITE_ONLY)
+	public List<Proficiency> getProficiencies() {
+		return this.proficiencies;
+	}
+
+	public HardSoftLongScore getScore() {
+		return this.score;
+	}
+
+	public List<Specialist> getSpecialistList() {
+		return this.specialistList;
+	}
+
+	public void setDistanceMatrix(Map<String, Map<String, Long>> distanceMatrix) {
+		this.distanceMatrix = distanceMatrix;
+		addDistancesToLocations();
+	}
+
+	public void setDistanceType(DistanceType distanceType) {
+		this.distanceType = distanceType;
+	}
+
+	public void setDistanceUnitOfMeasurement(String distanceUnitOfMeasurement) {
+		this.distanceUnitOfMeasurement = distanceUnitOfMeasurement;
+	}
+
+	public void setHomeList(List<Home> homeList) {
+		this.homeList = homeList;
+	}
+
+	public void setJobList(List<Job> jobList) {
+		this.jobList = jobList;
+
+		addProblemFactsForJobs();
+		addDistancesToLocations();
+	}
+
+	public void setLocationList(List<Location> locationList) {
+		this.locationList = locationList;
+	}
+
+	public void setProficiencies(List<Proficiency> proficiencies) {
+		this.proficiencies = proficiencies;
+	}
+
+	public void setScore(HardSoftLongScore score) {
+		this.score = score;
+	}
+
+	public void setSpecialistList(List<Specialist> specialistList) {
+		this.specialistList = specialistList;
+
+		updateHomeList();
+		addDistancesToLocations();
+	}
+
+	/**
+	 * Gathers the specialists home locations from the specialist list and adds
+	 * to the solution
+	 */
+	private void updateHomeList() {
+		this.homeList = this.specialistList.stream().map(Specialist::getHome).collect(Collectors.toList());
 	}
 }
